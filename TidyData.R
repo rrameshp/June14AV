@@ -1,3 +1,5 @@
+# Read the Training Data and then tidy it to multiple data and save it as RData files to be used when building models.
+
 library(rjson)
 library(data.table)
 
