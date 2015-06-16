@@ -39,6 +39,16 @@ system.time(test <- fread('Data/test.csv',  stringsAsFactors=F))
 
 #save(data, file="data.RData") #Command to save subset of train.
 
+# x = data.frame(num = 1:26, let = letters, LET = LETTERS)
+# ## number of chunks
+# n <- 12
+# # What this does is that in 12 levels it groups the remainder in a sorted order so that
+# # the split also comes in a sorted manner the rows determined by the count of remainder
+# # dfchunk <- split(x, factor(sort(rank(1:nrow(x))%%n)))
+# dfchunk <- split(x, factor(sort(1:nrow(x)%%n)))
+# dfchunk
+
+
 train <- train[POLYLINE!='[]']
 train <- train[DAY_TYPE =='A']
 
