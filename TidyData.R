@@ -19,7 +19,6 @@ get_coordinate <- function(row){
   return(list(start[1], start[2], end[1], end[2], snapshots))
 } 
 
-a
 ### Get Haversine distance
 get_dist <- function(lon1, lat1, lon2, lat2) {  
   lon_diff <- abs(lon1-lon2)*pi/360
@@ -55,7 +54,7 @@ trainxy$time <- (as.numeric(format(trainxy$time, "%H"))*60)
 
 
 library(MASS)
-library("ggplot2")
+library(ggplot2)
 
 ### plotting a few cases
 
