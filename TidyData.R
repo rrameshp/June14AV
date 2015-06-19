@@ -37,6 +37,10 @@ get_dist <- function(lon1, lat1, lon2, lat2) {
 system.time(train <- fread('Data/train.csv', stringsAsFactors=F, nrows=N_read))
 system.time(test <- fread('Data/test.csv',  stringsAsFactors=F))
 
+test$POLYLINE[1]
+
+
+
 #save(data, file="data.RData") #Command to save subset of train.
 
 # x = data.frame(num = 1:26, let = letters, LET = LETTERS)
@@ -282,3 +286,103 @@ for (i in 1:nrow(test)) {
 
 write_csv(submission, "max_time_elapsed_mean_time_benchmark.csv")
 #********
+
+#suggestion from the discuss analytics vidhya portal
+lat_lon <- function(x) {
+  s <- strsplit(x, '\\](,)\\[')
+  res <- s[[1]][c(1, length(s[[1]]))]
+  vals <- gsub('\\[|\\]', '', res)
+  vals
+}
+
+k = train$POLYLINE
+d = data.frame(jsoncol=k,stringsAsFactors = FALSE)
+f = lapply(d[[1]],lat_lon)
+#suggestion ends here
+
+
+get.route.trajectory <- function(x) {
+  #converts a character matrix into a two row numeric matrix representing latitude and longitude
+  
+  #removes unwanted characters
+  v <- gsub('\\[|\\]', '', x)
+  
+  #splits character into two columns
+  l <- strsplit(v, '(,)')
+  
+  #combines into a two column numeric vector
+  vec <- c(as.numeric(l[[1]][1]), as.numeric(l[[1]][2]))
+  vec
+}
+
+
+get.route <- function (x) {
+  #Gets the Character string of lattitude and longitude and returns a numeric matrix
+  #with two columns of latitude and longitude
+  
+  #returns a single item list which contains a character vector of lattitude longitude pair
+  s <- strsplit(x, '\\](,)\\[')
+  
+  #converts the character vector into a character matrix
+  d <- matrix(data = s[[1]], ncol = 1)
+  
+  #converts the character matrix into two row numeric array
+  route <-  vapply(d, get.route.trajectory, FUN.VALUE = double(2))
+  
+  #corrects the dimension of the numeric matrix
+  route <- t(route)
+  
+  #Sets the names of the dimensions of the matrix
+  colnames(route) <- c("latitude", "longitude")
+  rownames(route) <- 1:nrow(route)
+  route
+}
+
+x <- "[[-8.618643,41.141412],[-8.618499,41.141376],[-8.620326,41.14251]
+      ,[-8.622153,41.143815],[-8.623953,41.144373],[-8.62668,41.144778]
+      ,[-8.627373,41.144697],[-8.630226,41.14521],[-8.632746,41.14692]
+      ,[-8.631738,41.148225],[-8.629938,41.150385],[-8.62911,41.151213]
+      ,[-8.629128,41.15124],[-8.628786,41.152203],[-8.628687,41.152374]
+      ,[-8.628759,41.152518],[-8.630838,41.15268],[-8.632323,41.153022]
+      ,[-8.631144,41.154489],[-8.630829,41.154507],[-8.630829,41.154516]
+      ,[-8.630829,41.154498],[-8.630838,41.154489]]"
+
+get.route(x)
+
+lonlat <- fromJSON(x)
+
+route <- data.frame(lonlat)
+route <- t(route)
+
+#Sets the names of the dimensions of the matrix
+colnames(route) <- c("latitude", "longitude")
+rownames(route) <- 1:nrow(route)
+
+
+get.taxi.route <- function(x){
+  #Given a string representing JSON returns a data frame of double
+  #Better implementation than spliting and then converting to dataframe
+  
+  #convert it into list
+  lonlat <- fromJSON(x)
+  
+  #change from list to dataframe and correct column, row
+  route <- data.frame(lonlat)
+  route <- t(route)
+  
+  #Sets the names of the dimensions of the matrix
+  colnames(route) <- c("latitude", "longitude")
+  rownames(route) <- 1:nrow(route)
+  
+  return(route)
+} 
+
+
+# Reply to a query posted on discuss.analyticsvidhya.com
+# d = fromJSON(test$POLYLINE[1])
+# 
+# str(test$POLYLINE)
+# 
+# get.taxi.route(test$POLYLINE[1])
+# 
+# taxi.route <- lapply(test$POLYLINE, get.taxi.route)
