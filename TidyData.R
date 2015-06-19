@@ -385,4 +385,29 @@ get.taxi.route <- function(x){
 # 
 # get.taxi.route(test$POLYLINE[1])
 # 
-# taxi.route <- lapply(test$POLYLINE, get.taxi.route)
+taxi.route <- lapply(test$POLYLINE, get.taxi.route)
+
+get.start.end.latitude.longitude <- function(x){
+  #return a vector of co-ordinates of start and end of taxi route
+  start.latitude <- x[1, "latitude"]
+  start.longitude <- x[1, "longitude"]
+  end.latitude <- x[nrow(x), "latitude"]
+  end.longitude <- x[nrow(x), "longitude"]
+  start.end <- c("start.latitude" = start.latitude
+                 , "start.longitude" = start.longitude
+                 , "end.latitude" = end.latitude
+                 , "end.longitude" = end.longitude)
+  
+  return(start.end)
+}
+
+# sapply returns a matrix but will have to swap column and row
+start.end <- sapply(taxi.route, get.start.end.latitude.longitude)
+start.end <- t(start.end)
+
+#create new columns in the training data frame which maps to the column vectors of start.end
+test$start.latitude <- start.end[, "start.latitude"]
+test$start.longitude <- start.end[, "start.longitude"]
+test$end.latitude <- start.end[, "end.latitude"]
+test$end.longitude <- start.end[, "end.longitude"]
+
