@@ -354,15 +354,22 @@ lonlat <- fromJSON(x)
 route <- data.frame(lonlat)
 route <- t(route)
 
+nrow(route)
+route[ ,"Trip.Id"] <- NA
+
 #Sets the names of the dimensions of the matrix
-colnames(route) <- c("latitude", "longitude")
+colnames(route) <- c("TRIP_ID", "latitude", "longitude")
 rownames(route) <- 1:nrow(route)
 
 
-get.taxi.route <- function(x){
+get.taxi.route <- function(t){
   #Given a string representing JSON returns a data frame of double
   #Better implementation than spliting and then converting to dataframe
   
+  x <- t["POLYLINE"]
+  trip.id <- t["TRIP_ID"]
+  
+  # return(trip.id)
   #convert it into list
   lonlat <- fromJSON(x)
   
@@ -370,22 +377,30 @@ get.taxi.route <- function(x){
   route <- data.frame(lonlat)
   route <- t(route)
   
+  #create a character vector of Trip Id
+  v <- rep(trip.id, nrow(route))
+  
+  #add a new column
+  route <- cbind(v, route)
+  
   #Sets the names of the dimensions of the matrix
-  colnames(route) <- c("latitude", "longitude")
+  colnames(route) <- c("TRIP_ID", "latitude", "longitude")
   rownames(route) <- 1:nrow(route)
   
   return(route)
 } 
 
+#combine two vectors and output a dataframe
+dftwo <- data.frame(cbind(test$POLYLINE, test$TRIP_ID), stringsAsFactors = FALSE)
 
-# Reply to a query posted on discuss.analyticsvidhya.com
-# d = fromJSON(test$POLYLINE[1])
-# 
-# str(test$POLYLINE)
-# 
-# get.taxi.route(test$POLYLINE[1])
-# 
-taxi.route <- lapply(test$POLYLINE, get.taxi.route)
+#add column identifiers
+colnames(dftwo) <- c("POLYLINE", "TRIP_ID")
+
+#get a list of matrix with the route trajectory
+taxi.route <- apply(dftwo, 1, get.taxi.route)
+
+#flatten the list into a matrix
+route.all.taxi <- do.call(rbind, taxi.route)
 
 get.start.end.latitude.longitude <- function(x){
   #return a vector of co-ordinates of start and end of taxi route
