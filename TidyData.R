@@ -426,3 +426,18 @@ test$start.longitude <- start.end[, "start.longitude"]
 test$end.latitude <- start.end[, "end.latitude"]
 test$end.longitude <- start.end[, "end.longitude"]
 
+reverseGeoCode <- function(latlng) {
+  latlngStr <-  gsub(' ','%20', paste(latlng, collapse=","))#Collapse and Encode URL Parameters
+  library("RJSONIO") #Load Library
+  #Open Connection
+  connectStr <- paste('http://maps.google.com/maps/api/geocode/json?sensor=false&latlng=',latlngStr, sep="")
+  con <- url(connectStr)
+  data.json <- fromJSON(paste(readLines(con), collapse=""))
+  close(con)
+  #Flatten the received JSON
+  data.json <- unlist(data.json)
+  if(data.json["status"]=="OK")
+    address <- data.json["results.formatted_address"]
+  return (address)
+}
+address <- reverseGeoCode(c(37.4418834, -122.1430195))
